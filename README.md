@@ -27,6 +27,12 @@ A: Just go to Tools -> Options -> Web Clipper. In Advanced options section you w
 Q: How to get notebook ID from Joplin?  
 A: Choose the desired notebook, right-click on it, choose Copy external link. You will get something like `joplin://x-callback-url/openFolder?id=ZZZZ` in your clipboard. You need the ZZZZ part!
 
+Q: Does it support mixed content posts?  
+A: Absolutely! It will download images and videos as well. It will even preserve rich formatting of the original text! Note - images and videos will be put at the end of the note; videos won't have a thumbnail (but will perfectly open and play!).
+
+Q: Hey, why is my video not downloaded?!  
+A: That's inherit limitation of the default Telegram Bot API - everything bigger than 20MB is not allowed. If you want to bypass it, you need to run your own instance of a Telegram Bot API [server](https://github.com/tdlib/telegram-bot-api).
+
 Q: What happens when Joplin is not running?  
 A: Bot will let you know that it can't reach Joplin. Please launch it and forward the message again!
 
