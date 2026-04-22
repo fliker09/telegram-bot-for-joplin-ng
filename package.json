@@ -1,20 +1,19 @@
 {
-  "name": "joplin-telegram-bot",
-  "version": "0.0.1",
-  "description": "a telegram bot which creates joplin notes using received messages",
+  "name": "telegram_to_joplin_bot",
+  "version": "1.0.0",
+  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [
-    "telegram",
-    "bot",
-    "joplin"
-  ],
-  "author": "Hasan Gök",
+  "keywords": [],
+  "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^1.8.2",
-    "telegraf": "^3.38.0"
+    "axios": "^1.15.0",
+    "dotenv": "^17.4.2",
+    "form-data": "^4.0.5",
+    "lodash": "^4.18.1",
+    "telegraf": "^4.16.3"
   }
 }

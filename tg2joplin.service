@@ -1,0 +1,26 @@
+[Unit]
+Description=Telegram to Joplin Bridge Bot
+After=network.target
+
+[Service]
+# Run the service as your user
+User=user
+Group=user
+
+# Set the working directory so .env can be found
+WorkingDirectory=/home/user/Programs/Web/telegram-bot-for-joplin-ng
+
+# Use the absolute path to node followed by the script path
+ExecStart=/usr/bin/node /home/user/Programs/Web/telegram-bot-for-joplin-ng/index.js
+
+# Restart the bot automatically if it crashes
+Restart=always
+RestartSec=10
+
+# Logs will be handled by journald
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=tg-joplin-bot
+
+[Install]
+WantedBy=multi-user.target
