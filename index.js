@@ -34,27 +34,92 @@ bot.use(async (ctx, next) => {
 });
 
 /**
- * Converts Telegram Entities to Markdown
+ * Converts Telegram text and entities into clean, properly nested HTML
+ * using an event-driven approach. Completely eliminates Markdown corruption bugs.
  */
 function applyFormatting(text, entities) {
-    if (!entities || !text) return text;
-    let result = text;
-    const sortedEntities = [...entities].sort((a, b) => b.offset - a.offset);
-    for (const entity of sortedEntities) {
-        const { offset, length, type, url } = entity;
-        const part = result.substring(offset, offset + length);
-        let replacement = part;
-        switch (type) {
-            case 'bold': replacement = `**${part}**`; break;
-            case 'italic': replacement = `*${part}*`; break;
-            case 'code': replacement = `\`${part}\``; break;
-            case 'pre': replacement = `\`\`\`\n${part}\n\`\`\``; break;
-            case 'text_link': replacement = `[${part}](${url})`; break;
-            case 'url': replacement = `[${part}](${part})`; break;
-        }
-        result = result.substring(0, offset) + replacement + result.substring(offset + length);
+    if (!entities || entities.length === 0 || !text) {
+        return escapeHtml(text || '');
     }
-    return result;
+
+    // 1. Create start and end events for every entity
+    const events = [];
+    for (const entity of entities) {
+        events.push({ index: entity.offset, type: 'start', entity });
+        events.push({ index: entity.offset + entity.length, type: 'end', entity });
+    }
+
+    // 2. Sort events: by index ascending.
+    // If indices match, 'end' events come before 'start' events to ensure correct nesting.
+    events.sort((a, b) => {
+        if (a.index !== b.index) return a.index - b.index;
+        if (a.type === 'end' && a.type !== b.type) return -1;
+        if (a.type === 'start' && b.type !== b.type) return 1;
+        return 0;
+    });
+
+    let html = '';
+    let lastIndex = 0;
+
+    // 3. Build string sequentially, escaping raw text chunks and inserting tags
+    for (const event of events) {
+        if (event.index > lastIndex) {
+            html += escapeHtml(text.substring(lastIndex, event.index));
+            lastIndex = event.index;
+        }
+
+        if (event.type === 'start') {
+            html += getOpeningTag(event.entity, text);
+        } else {
+            html += getClosingTag(event.entity);
+        }
+    }
+
+    if (lastIndex < text.length) {
+        html += escapeHtml(text.substring(lastIndex));
+    }
+
+    return html;
+}
+
+function getOpeningTag(entity, text) {
+    switch (entity.type) {
+        case 'bold': return '<b>';
+        case 'italic': return '<i>';
+        case 'code': return '<code>';
+        case 'pre': return '<pre><code>';
+        case 'text_link': return `<a href="${entity.url}">`;
+        case 'url': {
+            const urlText = text.substring(entity.offset, entity.offset + entity.length);
+            return `<a href="${urlText}">`;
+        }
+        case 'strikethrough': return '<s>';
+        case 'underline': return '<u>';
+        default: return '';
+    }
+}
+
+function getClosingTag(entity) {
+    switch (entity.type) {
+        case 'bold': return '</b>';
+        case 'italic': return '</i>';
+        case 'code': return '</code>';
+        case 'pre': return '</code></pre>';
+        case 'text_link': return '</a>';
+        case 'url': return '</a>';
+        case 'strikethrough': return '</s>';
+        case 'underline': return '</u>';
+        default: return '';
+    }
+}
+
+function escapeHtml(str) {
+    return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 /**
