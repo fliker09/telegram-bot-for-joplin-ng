@@ -208,6 +208,10 @@ async function handleIncoming(ctx) {
         type = 'video_note';
         fileId = msg.video_note.file_id;
         ext = 'mp4';
+    } else if (msg.animation) {
+        type = 'animation';
+        fileId = msg.animation.file_id;
+        ext = 'mp4'; // Telegram animations are typically delivered as mp4 containers
     }
 
     if (type === 'text' && msg.text?.startsWith('/') && !mgId) return;
@@ -261,6 +265,6 @@ bot.start((ctx) => {
     }
 });
 
-bot.on(['text', 'photo', 'video', 'video_note'], (ctx) => handleIncoming(ctx));
+bot.on(['text', 'photo', 'video', 'video_note', 'animation'], (ctx) => handleIncoming(ctx));
 
 bot.launch().then(() => console.log('🚀 Secured Bot Version Running...'));
